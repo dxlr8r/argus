@@ -99,7 +99,7 @@ Will remove the key `operator` nested under `description` and all it's content.
 rm_value my_argus 'status reactor' 'false'
 ```
 
-Will remove all reactors with status false.
+Will remove all reactors with status false. `rm_value` also supports regular expressions, so you could  replace `'false'` with '`'f.*'`' for the same result.
 
 ### Filter
 

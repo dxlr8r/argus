@@ -1,6 +1,6 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.2
+# Version: 0.0.3
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
@@ -41,7 +41,7 @@ rm_key() {
     eval obj=\$"$1"
     key=$(_tab_key "$2")
 
-    printf "%s" "$obj" | grep -vE "^$key"
+    printf '%s' "$obj" | grep -vE "^$key"
   ) | \
   {
     # set variable named $1 to $value
@@ -56,9 +56,10 @@ rm_value() {
     # set obj to variable named $1
     eval obj=\$"$1"
     key=$(_tab_key "$2")
-    value=$(_quotew "$3")
+    value=$(printf '%s' "$3" | sed 's/\\/\\&/g')
 
-    printf "%s" "$obj" | grep -vx "${key}${value}"
+    # printf '%s' "$obj" | grep -vx "${key}${value}"
+    printf '%s' "$obj" | grep -vE "^${key}${value}\$"
   ) | \
   {
     # set variable named $1 to $value
