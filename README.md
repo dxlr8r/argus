@@ -4,6 +4,8 @@ _Pronounced any way you want._
 
 Argus provides a KISS implementation of associative and indexed arrays in any POSIX-compliant shell. Argus has a simple data structure, allowing you to manipulate and filter the arrays using simple common shell tools.
 
+Current status is under development, use with care.
+
 ## Usage
 
 First source argus:
@@ -41,9 +43,9 @@ add_value my_argus 'status reactor' 'true'
 add_value my_argus 'status reactor' 'false'
 ```
 
-### Get key
+### Get elements
 
-#### Get key pair:
+#### Get key pair
 
 ```sh
 get_pair my_argus 'description'
@@ -55,7 +57,7 @@ Stdout:
 operator
 ```
 
-#### Get value:
+#### Get value
 
 ```sh
 get_value my_argus 'status reactor'
@@ -68,7 +70,7 @@ true
 false
 ```
 
-#### Get tail:
+#### Get tail
 
 ```sh
 get my_argus 'status'
@@ -81,6 +83,24 @@ reactor	true
 reactor	false
 ```
 
+### Remove elements
+
+#### Remove a key
+
+```sh
+rm_key my_argus 'description operator'
+```
+
+Will remove the key `operator` nested under `description` and all it's content.
+
+#### Remove a value
+
+```sh
+rm_value my_argus 'status reactor' 'false'
+```
+
+Will remove all reactors with status false.
+
 ### Filter
 
 Use `grep`, `sed`, `awk` etc. 
@@ -88,11 +108,11 @@ Use `grep`, `sed`, `awk` etc.
 For example, count offline reactors:
 
 ```sh
-get my_argus 'status reactor' | grep -cF 'false'
+get my_argus 'status reactor' | grep -cxF 'false'
 ```
 
 Use `awk` to search for any key named `operator` nested one level below the root level:
 
 ```sh
-get my_argus '' | awk -v FS='\t' '{ if ($2 ~ "operator"  && $2 != $NF) { print }}'
+get my_argus '' | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
 ```

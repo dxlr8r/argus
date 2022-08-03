@@ -1,6 +1,6 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.1
+# Version: 0.0.2
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
@@ -33,7 +33,7 @@ add_value() {
   }
 }
 
-# rm_key my_argus 'a' 'b'
+# rm_key my_argus 'a'
 rm_key() {
   # subshell to keep variables local
   (
@@ -42,6 +42,23 @@ rm_key() {
     key=$(_tab_key "$2")
 
     printf "%s" "$obj" | grep -vE "^$key"
+  ) | \
+  {
+    # set variable named $1 to $value
+    eval "$1"'=$(cat)'
+  }
+}
+
+# rm_value my_argus 'a b' 'hello'
+rm_value() {
+  # subshell to keep variables local
+  (
+    # set obj to variable named $1
+    eval obj=\$"$1"
+    key=$(_tab_key "$2")
+    value=$(_quotew "$3")
+
+    printf "%s" "$obj" | grep -vx "${key}${value}"
   ) | \
   {
     # set variable named $1 to $value
