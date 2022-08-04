@@ -133,6 +133,12 @@ In `awk` the value is always located in `$NF`.
 get my_argus 'status reactor' | awk -v FS='\t' '{ if($NF == "true") { print } }'
 ```
 
+Or using `grep`:
+
+```sh
+get my_argus 'status reactor' | grep -E '\ttrue$'
+```
+
 #### Use `awk` to search for any key named `operator` nested one level below the root level
 
 ```sh
