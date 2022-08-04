@@ -117,13 +117,23 @@ Will remove all reactors with status false. `rmx_value` also supports regular ex
 
 Use `grep`, `sed`, `awk` etc. 
 
-For example, count offline reactors:
+Below are some examples:
+
+#### Count offline reactors
 
 ```sh
 get_tail my_argus 'status reactor' | grep -cxF 'false'
 ```
 
-Use `awk` to search for any key named `operator` nested one level below the root level:
+#### Filter out the entire row where the reactors are online
+
+In `awk` the value is always located in `$NF`.
+
+```sh
+get my_argus 'status reactor' | awk -v FS='\t' '{ if($NF == "true") { print } }'
+```
+
+#### Use `awk` to search for any key named `operator` nested one level below the root level
 
 ```sh
 get my_argus | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
