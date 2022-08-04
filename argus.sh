@@ -1,13 +1,22 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.8
+# Version: 0.0.9
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
 
-# quote newlines and tabs
-_quotew() {
+# escape newlines and tabs
+esc() {
   printf "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{printf substr($0, 1, length($0)-4) }'
+}
+
+# un/de escape escaped sequences
+unesc() {
+  if test "$#" -gt 0; then
+    printf '%b' "$@"
+  else
+    printf '%b' "$(cat)"
+  fi
 }
 
 _tab_key() {
@@ -23,7 +32,7 @@ add_value() {
     # set obj to variable named $1
     eval obj=\$"$1"
     key=$(printf "$2" | tr ' ' '\t')
-    value=$(_quotew "$3")
+    value=$(esc "$3")
     nl='\n'
     
     test -n "$obj" || nl=''
