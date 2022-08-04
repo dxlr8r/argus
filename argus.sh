@@ -1,6 +1,6 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.5
+# Version: 0.0.6
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
@@ -16,6 +16,8 @@ _tab_key() {
 
 # add_value my_argus 'a b' 'hello'
 add_value() {
+  # if neither is defined, return
+  test -n "${2// }${3// }" || return 0
   # subshell to keep variables local
   (
     # set obj to variable named $1
@@ -115,9 +117,16 @@ get_pair() (
   printf '%s' "$obj" | grep -E "^$key" | awk -v key="$key" '{print substr($0, length(key)+1) }' | awk -v FS='\t' '{print $1}'
 )
 
+# get_tail my_argus 'a b'
+get_tail() (
+  eval obj=\$"$1"
+  key=$(_tab_key "$2")
+  printf '%s' "$obj" | grep -E "^$key" | awk -v key="$key" '{print substr($0, length(key)+1) }'
+)
+
 # get my_argus 'a b'
 get() (
   eval obj=\$"$1"
   key=$(_tab_key "$2")
-  printf '%s' "$obj" | grep -E "^$key" | awk -v key="$key" '{print substr($0, length(key)+1) }'
+  printf '%s' "$obj" | grep -E "^$key"
 )

@@ -73,7 +73,7 @@ false
 #### Get tail
 
 ```sh
-get my_argus 'status'
+get_tail my_argus 'status'
 ```
 
 Stdout:
@@ -82,6 +82,8 @@ Stdout:
 reactor	true
 reactor	false
 ```
+
+If you want the entire row, not just the tail (key(s) removed), use `get`.
 
 ### Remove elements
 
