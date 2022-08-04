@@ -118,7 +118,7 @@ Use `grep`, `sed`, `awk` etc.
 For example, count offline reactors:
 
 ```sh
-get my_argus 'status reactor' | grep -cxF 'false'
+get_tail my_argus 'status reactor' | grep -cxF 'false'
 ```
 
 Use `awk` to search for any key named `operator` nested one level below the root level:
