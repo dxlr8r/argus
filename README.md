@@ -45,6 +45,8 @@ add_value my_argus 'status reactor' 'false'
 
 ### Get elements
 
+Regular expressions are supported in `get` and `get_value`. The regular expression should not contain ` ` (space), as that sign is used to separate keys.
+
 #### Get key pair
 
 ```sh
@@ -126,6 +128,8 @@ Use `awk` to search for any key named `operator` nested one level below the root
 ```sh
 get my_argus | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
 ```
+
+The query in the example above could also been done using `get` and with a regular expression: `get my_argus '.+ operator'`
 
 ### Other examples
 
