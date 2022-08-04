@@ -116,3 +116,19 @@ Use `awk` to search for any key named `operator` nested one level below the root
 ```sh
 get my_argus '' | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
 ```
+
+### Other examples
+
+Import a CSV dataset to an argus array:
+
+```
+dilithium_reserves='deneva,1337
+io,521
+elas,5147
+remus,217'
+
+printf '%s\n' "$dilithium_reserves" | while IFS=',' read key value
+do
+  add_value my_argus "status dilithium_reserves $key" "$value"
+done
+```
