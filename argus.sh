@@ -1,13 +1,15 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.9
+# Version: 0.1.0
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
 
+# shellcheck disable=SC2154
+
 # escape newlines and tabs
 esc() {
-  printf "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{printf substr($0, 1, length($0)-4) }'
+  printf '%b' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{printf substr($0, 1, length($0)-4) }'
 }
 
 # un/de escape escaped sequences
@@ -20,18 +22,18 @@ unesc() {
 }
 
 _tab_key() {
-  printf '%s' $1 "$(test -z "$1" || printf ' ')" | tr ' ' '\t'
+  printf '%s' "$1" "$(test -z "$1" || printf ' ')" | tr ' ' '\t'
 }
 
 # add_value my_argus 'a b' 'hello'
 add_value() {
   # if neither is defined, return
-  test -n "${2// }${3// }" || return 0
+  printf '%s\t' "${2}${3}" | grep -Eqv '^[[:space:]]+$' || return 0
   # subshell to keep variables local
   (
     # set obj to variable named $1
     eval obj=\$"$1"
-    key=$(printf "$2" | tr ' ' '\t')
+    key=$(printf '%s' "$2" | tr ' ' '\t')
     value=$(esc "$3")
     nl='\n'
     
@@ -116,7 +118,7 @@ rm_item() {
 get_value() (
   eval obj=\$"$1"
   key=$(_tab_key "$2")
-  keys=$(printf "$key" | tr '\t' '\n' | wc -l)
+  keys=$(printf '%s' "$key" | tr '\t' '\n' | wc -l)
   printf '%s' "$obj" | grep -E "^${key}" | awk -v keys="$keys" -v FS='\t' '{if (NF == keys+1) { print $NF }}'
 )
 
