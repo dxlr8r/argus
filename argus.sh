@@ -1,6 +1,6 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.0.6
+# Version: 0.0.7
 # Copyright (c) 2022, Simen Strange Øya
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
@@ -107,7 +107,8 @@ rm_item() {
 get_value() (
  eval obj=\$"$1"
  key=$(_tab_key "$2")
- printf '%s' "$obj" | grep -E "^$key" | awk -v FS='\t' '{print $NF}'
+ keys=$(printf '%s\n' $key | wc -l)
+ printf '%s' "$obj" | grep -E "^${key}" | awk -v keys="$keys" -v FS='\t' '{if (NF == keys+1) { print $NF }}'
 )
 
 # get_pair my_argus 'a'
