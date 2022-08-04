@@ -93,6 +93,14 @@ rm_key my_argus 'description operator'
 
 Will remove the key `operator` nested under `description` and all it's content.
 
+#### Remove an item
+
+```sh
+rm_item my_argus 'status reactor' '1'
+```
+
+Will remove the first item (`true`) from `reactor` nested under `status`. Note that the first item is 1, not 0.
+
 #### Remove a value
 
 ```sh
@@ -114,14 +122,14 @@ get my_argus 'status reactor' | grep -cxF 'false'
 Use `awk` to search for any key named `operator` nested one level below the root level:
 
 ```sh
-get my_argus '' | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
+get my_argus | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
 ```
 
 ### Other examples
 
-Import a CSV dataset to an argus array:
+#### Import a CSV dataset to the argus array
 
-```
+```sh
 dilithium_reserves='deneva,1337
 io,521
 elas,5147
@@ -131,4 +139,10 @@ printf '%s\n' "$dilithium_reserves" | while IFS=',' read key value
 do
   add_value my_argus "status dilithium_reserves $key" "$value"
 done
+```
+
+#### Read from pipe/stdin
+
+```sh
+printf 'Alpha Quadrant\n' | { add_value my_argus 'description location' "$(cat)" }
 ```
