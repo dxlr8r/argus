@@ -197,6 +197,6 @@ To *un/de escape* a string use `unesc` which supports strings as arguments or st
 
 The value is always a string, as the POSIX shell is typeless. If needed, you can represent data types using any notation you prefer, Argus has no best practices for this. One example could be to have the last key decide the data type, in this case a boolean.
 
-´´´sh
+```sh
 add_value my_argus 'status reactor boolean' 'true'
-´´´
+```
