@@ -157,16 +157,27 @@ io,521
 elas,5147
 remus,217'
 
-printf '%s\n' "$dilithium_reserves" | while IFS=',' read key value
-do
+while IFS=',' read key value; do
   add_value my_argus "status dilithium_reserves $key" "$value"
-done
+done << EOF
+$(printf '%s\n' "$dilithium_reserves")
+EOF
 ```
 
 #### Read from pipe/stdin
 
+In most shells a pipeline spawn a new subshell, the commom idiom to overcome this is to use here docs:
+
 ```sh
-printf 'Alpha Quadrant\n' | { add_value my_argus 'description location' "$(cat)" }
+IFS= add_value my_argus 'description location' << EOF
+$(printf 'Alpha Quadrant\n')
+EOF
+```
+
+In shells that allow it, like zsh yo could do:
+
+```zsh
+printf 'Alpha Quadrant\n' | { add_value my_argus 'description location'; }
 ```
 
 ## Data format and escape sequences
