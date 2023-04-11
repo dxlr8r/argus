@@ -1,7 +1,7 @@
 #!/bin/sh
 # Name: argus
-# Version: 0.2.0
-# Copyright (c) 2022, Simen Strange Øya
+# Version: 0.2.1
+# Copyright (c) 2022, Simen Strange
 # License: Modified BSD license
 # https://github.com/dxlr8r/argus/blob/master/LICENSE
 
@@ -9,7 +9,7 @@
 
 # escape newlines and tabs
 esc() {
-  printf '%b' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{printf substr($0, 1, length($0)-4) }'
+  printf '%b' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{ printf substr($0, 1, length($0)-4) }'
 }
 
 # un/de escape escaped sequences
@@ -48,10 +48,11 @@ add_value() {
   fi
 }
 
-_grepv() {
-  1=$(printf '%s\n' "$1" | sed 's/Fx/==/' | sed 's/E/~/')
-  cat | awk -v haystack="$2" 'BEGIN { needle=0 }; { if ($0 '"$1"' haystack ) { needle=1 } else { print }}; END { exit !needle }'
-}
+# like grep -v, but more suited handling of exit signals
+_grepv() (
+  pat=$(printf '%s\n' "$1" | sed 's/Fx/==/' | sed 's/E/~/')
+  cat | awk -v haystack="$2" 'BEGIN { needle=0 }; { if ($0 '"$pat"' haystack ) { needle=1 } else { print }}; END { exit !needle }'
+)
 
 # rm_key my_argus 'a'
 rm_key() {
