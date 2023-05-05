@@ -139,30 +139,3 @@ unesc
 Arguments: One argument or stdin.
 
 Description: Unscapes single escaped tabs and newlines of input string.
-
-#### Get key pair
-
-```sh
-get_pair my_argus 'description'
-```
-
-Stdout:
-
-```
-operator
-```
-
-#### Get tail
-
-```sh
-get_tail my_argus 'status'
-```
-
-Stdout:
-
-```
-reactor	true
-reactor	false
-```
-
-If you want the entire row, not just the tail (key(s) removed), use `get`.
