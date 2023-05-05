@@ -49,8 +49,8 @@ Description: Like rm_value, but value can be a regular expression
 ```sh
 rm_at_key obj ['key ...'] pos
 ```
-
-Description: Deletes entry in obj where key and value matches and is at position pos (`[0-1]+`). If pos is 0 remove the first entry, if 1 remove the last entry.
+s
+Description: Deletes entry in obj where key and value matches and is at position pos (`[0-1]+`). If pos is 1 remove the first entry, if 0 remove the last entry.
 
 ## get
 
