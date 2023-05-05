@@ -129,7 +129,7 @@ Will remove all reactors with status false. `rmx_value` also supports regular ex
 
 ### Others
 
-For a complete list of function and their documentation/usage [see]<docs/functions.md> 
+For a complete list of function and their documentation/usage [see](docs/functions.md)
 
 ## Examples
 
@@ -182,7 +182,7 @@ $(get_tail my_argus 'status dilithium_reserves')
 EOF
 ```
 
-For additional examples (see)<docs/loops.md>
+For additional examples [see](docs/loops.md)
 
 ### Read from pipe/stdin
 
@@ -202,4 +202,4 @@ printf 'Alpha Quadrant\n' | { add_value my_argus 'description location'; }
 
 # Want to know more?
 
-If you think Argus sounds interesting, and want to investigate more, take a look in the (documentation)<docs>
+If you think Argus sounds interesting, and want to investigate more, take a look in the [documentation](docs)
