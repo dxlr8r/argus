@@ -2,11 +2,11 @@
 
 _Pronounced any way you want._
 
-Argus provides a KISS implementation of associative and indexed arrays in any POSIX-compliant shell. Argus has a simple data structure, allowing you to manipulate and filter the arrays using simple common shell tools.
+Argus provides a KISS implementation of associative and indexed lists in any POSIX-compliant shell. Argus has a simple data structure, allowing you to manipulate and filter the lists using simple common shell tools.
 
 Current status is under development, use with care.
 
-## Usage
+# Getting started
 
 First source argus:
 
@@ -14,142 +14,48 @@ First source argus:
 source argus.sh
 ```
 
-### Create array
+## Create list
 
-Creating an array is as simple as:
+Creating an empty list is as simple as:
 
 ```sh
 my_argus=''
 ```
 
-### Add key/value pairs to array
+## Add key/value pairs to list
 
 Let us implement the following YAML object literal:
 
 ```
-type: Subspace telescope
+name: Argus Array
 description:
+  type: Subspace telescope
   operator: Starfleet
+  quadrant: alpha
+  energy_source: fusion reactor
 status:
-  reactor: 
+  reactor:
+    - true
+    - true
     - true
     - false
 ```
 
 ```sh
-add_value my_argus 'type' 'Subspace telescope'
+add_value my_argus 'name' 'Argus Array'
+add_value my_argus 'description type' 'Subspace telescope'
 add_value my_argus 'description operator' 'Starfleet'
+add_value my_argus 'description quadrant' 'alpha'
+add_value my_argus 'description energy_source' 'fusion reactor'
+add_value my_argus 'status reactor' 'true'
+add_value my_argus 'status reactor' 'true'
 add_value my_argus 'status reactor' 'true'
 add_value my_argus 'status reactor' 'false'
 ```
 
-### Get elements
+## Import a CSV dataset to the argus list
 
-Regular expressions are supported in `get` and `get_value`. The regular expression should not contain ` ` (space), as that sign is used to separate keys.
-
-#### Get key pair
-
-```sh
-get_pair my_argus 'description'
-```
-
-Stdout:
-
-```
-operator
-```
-
-#### Get value
-
-```sh
-get_value my_argus 'status reactor'
-```
-
-Stdout:
-
-```
-true
-false
-```
-
-#### Get tail
-
-```sh
-get_tail my_argus 'status'
-```
-
-Stdout:
-
-```
-reactor	true
-reactor	false
-```
-
-If you want the entire row, not just the tail (key(s) removed), use `get`.
-
-### Remove elements
-
-#### Remove a key
-
-```sh
-rm_key my_argus 'description operator'
-```
-
-Will remove the key `operator` nested under `description` and all it's content.
-
-#### Remove an item
-
-```sh
-rm_item my_argus 'status reactor' '1'
-```
-
-Will remove the first item (`true`) from `reactor` nested under `status`. Note that the first item is 1, not 0.
-
-#### Remove a value
-
-```sh
-rm_value my_argus 'status reactor' 'false'
-```
-
-Will remove all reactors with status false. `rmx_value` also supports regular expressions, so you could  replace `'false'` with `'f.*'` for the same result.
-
-### Filter
-
-Use `grep`, `sed`, `awk` etc. 
-
-Below are some examples:
-
-#### Count offline reactors
-
-```sh
-get_tail my_argus 'status reactor' | grep -cxF 'false'
-```
-
-#### Filter out the entire row where the reactors are online
-
-In `awk` the value is always located in `$NF`.
-
-```sh
-get my_argus 'status reactor' | awk -v FS='\t' '{ if($NF == "true") { print } }'
-```
-
-Or using `grep`:
-
-```sh
-get my_argus 'status reactor' | grep -E '\ttrue$'
-```
-
-#### Use `awk` to search for any key named `operator` nested one level below the root level
-
-```sh
-get my_argus | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
-```
-
-The query in the example above could also been done using `get` and with a regular expression: `get my_argus '.+ operator'`
-
-### Other examples
-
-#### Import a CSV dataset to the argus array
+Here we define the CSV in a variable as an example:
 
 ```sh
 dilithium_reserves='deneva,1337
@@ -164,9 +70,123 @@ $(printf '%s\n' "$dilithium_reserves")
 EOF
 ```
 
-#### Read from pipe/stdin
+## Backup object
 
-In most shells a pipeline spawn a new subshell, the commom idiom to overcome this is to use here docs:
+Just write it to a file
+
+```sh
+get my_argus > my_argus
+```
+
+And restore from backup:
+
+```sh
+my_argus=$(cat my_argus)
+```
+
+## Get elements
+
+Regular expressions are supported in all `get` functions. The regular expression should not contain ` ` (space), as that sign is used to separate keys.
+
+### Get value
+
+```sh
+get_value my_argus 'status reactor'
+```
+
+Stdout:
+
+```
+true
+false
+```
+
+## Remove elements
+
+### Remove a key
+
+```sh
+rm_key my_argus 'description operator'
+```
+
+Will remove the key `operator` nested under `description` and all it's content.
+
+### Remove an element
+
+```sh
+rm_at_key my_argus 'status reactor' '1'
+```
+
+Will remove the first element (`true`) from `reactor` nested under `status`. Note that the first element is 1, not 0.
+
+### Remove a value
+
+```sh
+rm_value my_argus 'status reactor' 'false'
+```
+
+Will remove all reactors with status false. `rmx_value` also supports regular expressions, so you could replace `'false'` with `'f.*'` for the same result.
+
+### Others
+
+For a complete list of function and their documentation/usage [see]<docs/functions.md> 
+
+## Examples
+
+Use `grep`, `sed`, `awk` etc. 
+
+Below are some examples:
+
+### Count offline reactors
+
+```sh
+get_value my_argus 'status reactor' | grep -cxF 'false'
+```
+
+### Filter out the entire row where the reactors are online
+
+In `awk` the value is always located in `$NF`.
+
+```sh
+get my_argus 'status reactor' | awk -v FS='\t' '{ if($NF == "true") { print } }'
+```
+
+Or using `grep`:
+
+```sh
+get my_argus 'status reactor' | grep -E '\ttrue$'
+```
+
+### Use `awk` to search for any key named `operator` nested one level below the root level
+
+```sh
+get my_argus | awk -v FS='\t' '{ if ($2 ~ "operator" && $2 != $NF) { print }}'
+```
+
+The query in the example above could also been done using `get` and with a regular expression: `get my_argus '.+ operator'`
+
+
+### Looping
+
+Get systems where the dilithium reserves are low:
+
+```sh
+while IFS= read -r entry; do
+  reserves=$(get_value entry)
+  system=$(echo "$entry" | awk '{print $1}')
+  if test "$reserves" -lt 1000; then
+    printf 'system "%s" has dangerously low reserves of dilithium: %s\n' "$system" "$reserves"
+  fi
+done << EOF
+$(get_tail my_argus 'status dilithium_reserves')
+EOF
+```
+
+For additional examples (see)<docs/loops.md>
+
+### Read from pipe/stdin
+
+In most shells a pipeline spawn a new subshell, the common idiom to overcome this is to use here docs:
 
 ```sh
 IFS= add_value my_argus 'description location' << EOF
@@ -174,40 +194,12 @@ $(printf 'Alpha Quadrant\n')
 EOF
 ```
 
-In shells that allow it, like zsh yo could do:
+In shells that allow it, like zsh you could do:
 
 ```zsh
 printf 'Alpha Quadrant\n' | { add_value my_argus 'description location'; }
 ```
 
-## Data format and escape sequences
+# Want to know more?
 
-Argus dataformat is simply a tab separated values list (tsv), from the usage section above we would be left with:
-
-```sh
-get my_argus | sort
-```
-
-Stdout:
-
-```
-description	location	Alpha Quadrant
-description	operator	Starfleet
-status	dilithium_reserves	deneva	1337
-status	dilithium_reserves	elas	5147
-status	dilithium_reserves	io	521
-status	dilithium_reserves	remus	217
-status	reactor	false
-status	reactor	true
-type	Subspace telescope
-```
-
-Each value has 1 or more keys, and the value is always the last column. The value **cannot** contain a tab or a newline, so any string that contains these characters requires them to be replaced with the escape sequence equivalent, which `add_value` does by default using the helper function `esc`. Using `esc` or your own implementation, custom functions for manipulation is possible and encouraged where needed.
-
-To *un/de escape* a string use `unesc` which supports strings as arguments or stdin (pipe). You can also use `printf '%b'` etc.
-
-The value is always a string, as the POSIX shell is typeless. If needed, you can represent data types using any notation you prefer, Argus has no best practices for this. One example could be to have the last key decide the data type, in this case a boolean.
-
-```sh
-add_value my_argus 'status reactor boolean' 'true'
-```
+If you think Argus sounds interesting, and want to investigate more, take a look in the (documentation)<docs>

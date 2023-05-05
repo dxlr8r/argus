@@ -1,16 +1,14 @@
 #!/bin/sh
-# Name: argus
-# Version: 0.3.0-alpha
-# Copyright (c) 2022, Simen Strange
-# License: Modified BSD license
-# https://github.com/dxlr8r/argus/blob/master/LICENSE
+# SPDX-FileCopyrightText: 2022-2023 Simen Strange <https://github.com/dxlr8r/argus>
+# SPDX-License-Identifier: MIT
+# Version: 0.3.0-beta
 
 # shellcheck disable=SC2154
 
 # escape newlines and tabs
 esc() {
   _() (
-    printf '%b_' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{ printf substr($0, 1, length($0)-5) }'
+    printf '%s_' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{ printf substr($0, 1, length($0)-5) }'
   )
   if test "$#" -gt 0; then
     _ "$@"
@@ -18,7 +16,6 @@ esc() {
     _ "$(cat)"
   fi
 }
-
 
 # un/de escape escaped sequences
 unesc() {
@@ -59,7 +56,7 @@ _if_last_key_is_int_remove_it() {
   awk -v key="$1" -v OFS='\t' 'BEGIN { $0 = key; sub(/[ \t]*$/, "", $0); if ($NF ~ /^[0-9]+$/) {$NF=""; print; exit 0} else {exit 1}}'
 }
 
-_array_add_or_rm() (
+_ilist_add_or_rm() (
   action=$1
   key=$2
   value=$3
@@ -100,11 +97,15 @@ _array_add_or_rm() (
   fi
 
   # check if idx is valid if not replace with max_idx
-  if test $idx -gt $max_idx || test $idx -eq 0; then
+  # if test $idx -gt $max_idx || test $idx -eq 0; then
+  if test $idx -eq 0; then
     test "$action" = "add" && idx=$((max_idx+1)) || :
     test "$action" = "rm"  && idx=$max_idx || :
     key=$(printf '%s' "$key" | awk -v FS='\t' -v OFS='\t' -v new_idx="$idx" -v qty_keys="$qty_keys" '$(qty_keys) = new_idx')
   fi
+
+  # if out of bounds, return
+  #test $idx -gt $max_idx && { printf '%s' "$obj"; return 1; } || :
 
   # rm element
   test "$action" = "rm" && obj=$(printf '%s' "$obj" | grep -vE "^$key") || :
@@ -129,8 +130,8 @@ add_value() {
     key=$(_tab_key "$2")
     value=$(esc "$3")
 
-    if _if_last_key_is_int_remove_it "$key" >/dev/null; then
-      _array_add_or_rm "add" "$key" "$value" "$obj" 
+    if test "$ARGUS_NILIST" && _if_last_key_is_int_remove_it "$key" >/dev/null; then
+      _ilist_add_or_rm "add" "$key" "$value" "$obj" 
     else
       test -n "$obj" && printf '%s\n' "$obj" || :
       printf "%s%s\n" "$key" "$value"
@@ -144,6 +145,30 @@ add_value() {
   fi
 }
 
+# add_value_at my_argus 'a b' 1 'hello'
+add_value_at() {
+  # need to be defined
+  _empty_or_ws "$1" "$3" || return $?
+  _empty "$2" "$4" || return $?
+
+  _() (
+    eval obj=\$"$1"
+    key=$(_tab_key "$2")
+    item=$3
+    value=$(esc "$4")
+
+    # printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { printf "%s%s\n", key, value } }'
+    printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { if(idx == 0) { printf "%s%s\n", key, value } else {exit 1}}} '
+  )
+
+  # set variable named $1 to $value
+  if test "$#" -eq 4; then
+    eval "$1"'=$(_ "$1" "$2" "$3" "$4")'
+  else
+    eval "$1"'=$(_ "$1" "$2" "$3" "$(cat)")'
+  fi  
+}
+
 # rm_key my_argus 'a'
 rm_key() {
   # need to be defined
@@ -154,8 +179,8 @@ rm_key() {
     key=$(_tab_key "$2")
 
     # if the last key is an int, fill it's gap
-    if _if_last_key_is_int_remove_it "$key" >/dev/null; then
-      _array_add_or_rm "rm" "$key" "$value" "$obj" 
+    if test "$ARGUS_NILIST" && _if_last_key_is_int_remove_it "$key" >/dev/null; then
+      _ilist_add_or_rm "rm" "$key" "$value" "$obj" 
     else
       test -n "$obj" && printf '%s' "$obj" | grep -vE "^$key"
     fi
@@ -195,104 +220,110 @@ rmx_value() {
   eval "$1"'=$(_ "$1" "$2" "$3")'
 }
 
-# add_value_at my_argus 'a b' 1 'hello'
-add_value_at() {
-  # need to be defined
-  _empty_or_ws "$1" "$3" || return $?
-  _empty "$2" "$4" || return $?
-
-  _() (
-    eval obj=\$"$1"
-    key=$(_tab_key "$2")
-    item=$3
-    value=$(esc "$4")
-
-    printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { printf "%s%s\n", key, value } }'
-  )
-  eval "$1"'=$(_ "$1" "$2" "$3" "$4")'
-}
-
-# rm_value_at my_argus 'a b' 1
-rm_value_at() {
+# rm_at_key my_argus 'a b' 1
+rm_at_key() {
   # need to be defined
   _empty_or_ws "$1" || return $?
-  _empty "$2" "$3" || return $?
   _() (
+    _empty "$3" || return $?
     eval obj=\$"$1"
     key=$(_tab_key "$2")
     item=$3
     regex="^${key}"
 
     rows=$(printf '%s' "$obj" | awk -v regex="$regex" 'BEGIN {rows=0} {if ($0 ~ regex) {rows=rows+1}} END {print rows}')
+    test $rows -eq 0 && { printf '%s' "$obj"; return 1; } || :
     printf '%s' "$obj" | awk -v regex="$regex" -v item="$item" -v rows="$rows" \
-      'BEGIN {if(item == 0 || item > rows) {item=rows}} {if ($0 ~ regex && NR == item) {} else { print }}'
+      'BEGIN {found=0; row=0; if(item == 0) {item=rows}} 
+      #BEGIN {row=0; if(item == 0 || item > rows) {item=rows}} 
+      {
+        if ($0 ~ regex) {row=row+1; if(row == item) { found=1 } else { print }} 
+        else { print }
+      }
+      END {exit !found}'
   )
-  eval "$1"'=$(_ "$1" "$2" "$3")'
+  if   test "$#" -eq 2; then
+    eval "$1"'=$(_ "$1" "" "$2")'
+  elif test "$#" -eq 3; then
+    eval "$1"'=$(_ "$1" "$2" "$3")'
+  fi
 }
 
-# get_at my_argus 'a b' 1
-get_at() (
+# get my_argus 'a b'
+get() (
   # need to be defined
   _empty_or_ws "$1" || return $?
-  _empty "$2" "$3" || return $?
-
-  eval obj=\$"$1"
+  if test "$1" = "-"; then
+    obj=$(cat)
+  else
+    eval obj=\$"$1"
+  fi
   key=$(_tab_key "$2")
-  printf '%s' "$obj" | grep -E "^$key" | awk -v item=$3 'BEGIN {found=0} {if (NR==item) {print; found=1}} END { if (!found && item==0) {print}}'
-)
-
-# get_enumerated my_argus 'a b'
-get_enumerated() (
-  # need to be defined
-  _empty_or_ws "$1" || return $?
-  get "$1" "$2" | awk '{print NR}'
+  # last key is int and is 0
+  if test "$ARGUS_NILIST" && rkey=$(_if_last_key_is_int_remove_it "$key") && awk -v key="$key" 'BEGIN { $0 = key; if ($NF != 0) {exit 1} }' ; then
+    regex="^${rkey}[-]?[0-9]+[[:blank:]]"
+    printf '%s' "$obj" | grep -E "$regex" | tail -n1 | awk '{print} END { exit !NR }'
+  else
+    printf '%s' "$obj" | grep -E "^$key"
+  fi
 )
 
 # get_value my_argus 'a'
 get_value() (
   # need to be defined
   _empty_or_ws "$1" || return $?
-  _empty "$2" || return $?
-  eval obj=\$"$1"
-  key=$(_tab_key "$2")
-  keys=$(printf '%s' "$key" | tr '\t' '\n' | wc -l)
-  printf '%s' "$obj" | grep -E "^${key}" | awk -v keys="$keys" -v FS='\t' '{if (NF == keys+1) { print $NF }} END { exit !NR }'
+  get "$1" "$2" | awk -v rkey="$2" -v keys=$(printf '%s' "$2" | awk '{print NF}') -v FS='\t' '{if (NF == keys+1 || rkey == "") { print $NF }} END { exit !NR }'
 )
 
 # get_pair my_argus 'a'
-get_pair() (
+get_pair() {
   # need to be defined
   _empty_or_ws "$1" || return $?
   _empty "$2" || return $?
-  eval obj=\$"$1"
-  key=$(_tab_key "$2")
-  printf '%s' "$obj" | grep -E "^$key" | awk -v key="$key" '{print substr($0, length(key)+1) }' | awk -v FS='\t' '{print $1} END { exit !NR }'
-)
+  get "$1" "$2" | awk -v key="$(_tab_key "$2")" '{print substr($0, length(key)+1) }' | awk -v FS='\t' '{print $1} END { exit !NR }'
+}
 
 # get_tail my_argus 'a b'
-get_tail() (
+get_tail() {
   # need to be defined
   _empty_or_ws "$1" || return $?
   _empty "$2" || return $?
-  eval obj=\$"$1"
-  key=$(_tab_key "$2")
-  printf '%s' "$obj" | grep -E "^$key" | awk -v key="$key" '{print substr($0, length(key)+1) } END { exit !NR }'
-)
+  get "$1" "$2" | awk -v key="$(_tab_key "$2")" '{print substr($0, length(key)+1) } END { exit !NR }'
+}
 
-# get my_argus 'a b'
-# TODO, implement `get my_argus 'a b 0'` will get last element, like get_at
-get() (
+# get_at my_argus 'a b' 1
+get_at() (
   # need to be defined
   _empty_or_ws "$1" || return $?
-  eval obj=\$"$1"
-  key=$(_tab_key "$2")
-  printf '%s' "$obj" | grep -E "^$key"
+
+  if   test "$#" -eq 2; then
+    _empty "$2" || return $?
+    key=''
+    pos=$2
+  elif test "$#" -eq 3; then
+    _empty "$3" || return $?
+    key=$2
+    pos=$3
+  else
+    return 1
+  fi 
+
+  get "$1" "$key" | awk -v item="$pos" 'BEGIN {found=0} {if (NR==item) {print; found=1}} END { if (!found && item==0) {print} else if (!found && item > 0) {exit 1}}'
 )
 
-enumerate_array() {
+# get_enumerated my_argus 'a b'
+get_enumerated() (
+  # need to be defined
+  _empty_or_ws "$1" || return $?
+  get "$1" "$2" | awk '{print NR} END { exit !NR }'
+)
+
+pack_ilist() {
   # need to be defined
   _empty_or_ws "$1" || return $?
   _empty "$2" || return $?
+  test "$ARGUS_NILIST" || return 1
+
   _() (
     eval obj=\$"$1"
     key=$(_tab_key "$2")
