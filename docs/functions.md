@@ -7,6 +7,7 @@ add_value obj 'key ...' [value]
 ```
 
 Arguments: If last argument is not supplied, will read from stdin
+
 Description: Add value to variable obj nested under key
 
 ## add_value_at
@@ -16,6 +17,7 @@ add_value obj 'key ...' pos [value]
 ```
 
 Arguments: If last argument is not supplied, will read from stdin
+
 Description: Add value to variable obj nested under key as a list at position pos (`[0-1]+`). If pos is 0 add to the end of the list, if 1 add to the beginning.
 
 ## rm_key
@@ -109,6 +111,7 @@ esc [string]
 ```
 
 Arguments: If last argument is not supplied, will read from stdin.
+
 Description: Escapes tab and newline of input string. Please note that trailing newlines will be trimmed because of the way the POSIX shells handles trailing newlines.
 
 
@@ -134,6 +137,7 @@ unesc
 ```
 
 Arguments: One argument or stdin.
+
 Description: Unscapes single escaped tabs and newlines of input string.
 
 #### Get key pair
