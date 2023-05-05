@@ -99,7 +99,7 @@ Description: Print to stdout entry where key matches and is at position pos (`[0
 get_enumerated obj ['key ...']
 ```
 
-Description: Print to stdout entries where key matches as an enumerated list, a sequence of positive integert starting at 1. 
+Description: Print to stdout entries where key matches as an enumerated list, a sequence of positive integers starting at 1. 
 
 
 # Helper functions
