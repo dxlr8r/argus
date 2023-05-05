@@ -6,7 +6,7 @@ The example in "Getting started -> Looping" is the one I recommend, as that is t
 
 ## While
 
-As shown in the "Getting started -> Looping" section of the [README](../README.md)
+As shown in the "Getting started -> Looping" section of the [README](../README.md#looping)
 
 Same example as above, fetching until empty instead of HERE DOC:
 
