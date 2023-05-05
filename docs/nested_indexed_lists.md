@@ -13,7 +13,7 @@ add_value obj 'spec 2 name' b
 add_value obj 'spec 2 port' 443
 ```
 
-This however leads to some issues, in this case the indexing is defined manually. Usually we use the `add_value_at` function to manipulate a list, but that only works for named indexed lists, meaning each list has it's own named key (meaing not an integer/index).
+This however leads to some issues, in this case the indexing is defined manually. Usually we use the `add_value_at` function to manipulate a list, but that only works for named indexed lists, meaning each list has it's own named key (meaning not an integer/index).
 
 I would argue that a better data structure, is to define the same data, still using JSON, as such:
 
@@ -44,7 +44,7 @@ To unset it:
 unset ARGUS_NILIST
 ```
 
-Argus will now enable additional features, like the ability to add an element to the end of an indexed list etc.
+Argus will now enable additional features, like the ability to add/remove an element to the beginning/end of an indexed list etc.
 
 For example:
 
