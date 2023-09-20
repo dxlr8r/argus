@@ -182,7 +182,7 @@ rm_key() {
     if test "$ARGUS_NILIST" && _if_last_key_is_int_remove_it "$key" >/dev/null; then
       _ilist_add_or_rm "rm" "$key" "$value" "$obj" 
     else
-      test -n "$obj" && printf '%s' "$obj" | grep -vE "^$key"
+      test -n "$obj" && printf '%s' "$obj" | _grepv E "^$key"
     fi
   )
   eval "$1"'=$(_ "$1" "$2")'
