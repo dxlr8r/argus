@@ -157,8 +157,7 @@ add_value_at() {
     item=$3
     value=$(esc "$4")
 
-    # printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { printf "%s%s\n", key, value } }'
-    printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { if(idx == 0) { printf "%s%s\n", key, value } else {exit 1}}} '
+    printf '%s' "$obj" | awk -v FS='\t' -v OFS='\t' -v idx="$item" -v key="$key" -v value="$value" 'BEGIN {added=0} {if(NR == idx) { printf "%s%s\n%s\n", key, value, $0; added=1 } else {print}} END { if(!added) { if(idx == 0) { printf "%s%s\n", key, value } else if (idx == 1 && NR == 0 && $0 == "") { printf "%s%s\n", key, value } else {exit 1}}}'
   )
 
   # set variable named $1 to $value
