@@ -8,7 +8,7 @@
 # escape newlines and tabs
 esc() {
   _() (
-    printf '%s_' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{ printf substr($0, 1, length($0)-5) }'
+    printf '%s_' "$1" | sed 's/\\/\\&/g' | awk -v RS='\t' -v ORS='\\t' 1 | awk -v ORS='\\n' 1 | awk '{ printf "%s", substr($0, 1, length($0)-5) }'
   )
   if test "$#" -gt 0; then
     _ "$@"
